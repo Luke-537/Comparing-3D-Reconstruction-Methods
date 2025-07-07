@@ -1,3 +1,18 @@
 [submodule "external/met3r"]
 	path = external/met3r
 	url = https://github.com/mohammadasim98/met3r
+[submodule "external/InstantMesh"]
+	path = external/InstantMesh
+	url = https://github.com/TencentARC/InstantMesh
+[submodule "external/LGM"]
+	path = external/LGM
+	url = https://github.com/3DTopia/LGM
+[submodule "external/ZeroShape"]
+	path = external/ZeroShape
+	url = https://github.com/zxhuang1698/ZeroShape
+[submodule "external/Hunyuan3D-2"]
+	path = external/Hunyuan3D-2
+	url = https://github.com/Tencent-Hunyuan/Hunyuan3D-2
+[submodule "external/TripoSR"]
+	path = external/TripoSR
+	url = https://github.com/VAST-AI-Research/TripoSR
