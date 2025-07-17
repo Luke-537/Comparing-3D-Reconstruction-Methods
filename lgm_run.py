@@ -120,7 +120,7 @@ input_files = [
 print(f'Total number of input images: {len(input_files)}')
 
 # Create mesh for each input file
-for file, idx in enumerate(input_files):
+for idx, file in enumerate(input_files):
     if not os.path.isfile(file):
         raise FileNotFoundError(f"Input file {file} does not exist.")
     else:
