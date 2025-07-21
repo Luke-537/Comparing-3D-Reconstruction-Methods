@@ -78,11 +78,11 @@ ground_truth_mesh = load_glb_as_mesh("references/elephant_gt.glb").process(valid
 output_mesh = trimesh.load("outputs/triposr/2/mesh.obj").process(validate=True)
 
 # Sample point clouds from aligned meshes
-points_gt = ground_truth_mesh.sample(20000)
-points_output = output_mesh.sample(20000)
+points_gt = ground_truth_mesh.sample(10000)
+points_output = output_mesh.sample(10000)
 
-points_gt = normalize(points_gt)
-points_output = normalize(points_output)
+#points_gt = normalize(points_gt)
+#points_output = normalize(points_output)
 
 # Align meshes (align output_mesh to ground_truth_mesh)
 points_aligned = align_pc(points_output.copy(), points_gt)
