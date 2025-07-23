@@ -125,10 +125,6 @@ if IS_FLEXICUBES:
 
 model = model.eval()
 
-# make output directory
-output_mesh_path = output_base / "meshes"
-os.makedirs(output_mesh_path, exist_ok=True)
-
 # Extract all input files from input directory
 input_files = [
         os.path.join(input_base, file) 
@@ -183,7 +179,7 @@ for idx, sample in enumerate(outputs):
         planes = model.forward_planes(images, input_cameras)
 
         # get mesh
-        mesh_path_idx = os.path.join(output_mesh_path, f'{name}.obj')
+        mesh_path_idx = os.path.join(output_base, f'{name}.obj')
 
         mesh_out = model.extract_mesh(
             planes,

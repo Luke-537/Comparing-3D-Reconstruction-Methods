@@ -23,6 +23,7 @@ sys.path.insert(0, str(LGM_ROOT / "src"))
 from external.LGM.core.options import config_defaults, Options
 from external.LGM.core.models import LGM
 from external.LGM.mvdream.pipeline_mvdream import MVDreamPipeline
+from external.LGM.convert import Converter
 
 IMAGENET_DEFAULT_MEAN = (0.485, 0.456, 0.406)
 IMAGENET_DEFAULT_STD = (0.229, 0.224, 0.225)
@@ -119,10 +120,34 @@ input_files = [
     ]
 print(f'Total number of input images: {len(input_files)}')
 
-# Create mesh for each input file
+# Create point cloud for each input file
 for idx, file in enumerate(input_files):
     if not os.path.isfile(file):
         raise FileNotFoundError(f"Input file {file} does not exist.")
     else:
-        print(f'[{idx+1}/{len(input_files)}] Creating {file} ...')
+        print(f'[{idx+1}/{len(input_files)}] Creating point cloud for {file} ...')
         process(opt, file)
+
+# Extract all output point clouds from output directory
+output_point_clouds = [
+        os.path.join(output_base, file) 
+        for file in os.listdir(output_base) 
+        if file.endswith('.ply')
+    ]
+print(f'Total number of point clouds saved: {len(output_point_clouds)}')
+
+# Create mesh for each point cloud
+for idx, file in enumerate(output_point_clouds):
+    if not os.path.isfile(file):
+        raise FileNotFoundError(f"Input file {file} does not exist.")
+    else:
+        print(f'[{idx+1}/{len(output_point_clouds)}] Creating mesh for {file} ...')
+        mesh_opt = config_defaults["big"]
+        mesh_opt.resume = str(lgm_base / "pretrained" / "model_fp16.safetensors")
+        mesh_opt.workspace = str(output_base)
+        mesh_opt.test_path = str(file)
+        converter = Converter(opt=mesh_opt).cuda()
+        converter.fit_nerf()
+        converter.fit_mesh()
+        converter.fit_mesh_uv()
+        converter.export_mesh(mesh_opt.test_path.replace('.ply', '.glb'))
