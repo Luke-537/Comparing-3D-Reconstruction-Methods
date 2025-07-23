@@ -12,42 +12,30 @@ def align_pc(source_points, target_points):
     pcd_source = o3d.geometry.PointCloud()
     pcd_source.points = o3d.utility.Vector3dVector(source_points)
 
-    #R = pcd_source.get_rotation_matrix_from_xyz((0, np.pi * 1.5, np.pi))
+    #R = pcd_source.get_rotation_matrix_from_xyz((np.pi/2, 0, 0))
     #pcd_source.rotate(R, center=(0,0,0))
-    #save_point_cloud(np.asarray(pcd_source.points), "tests/test.ply")
+    #save_point_cloud(np.asarray(pcd_source.points), "tests/test_source.ply")
+    #save_point_cloud(np.asarray(pcd_target.points), "tests/test_target.ply")
 
     # Run ICP
     reg_result = o3d.pipelines.registration.registration_icp(
         pcd_source, pcd_target, 
-        max_correspondence_distance=0.5,
+        max_correspondence_distance=0.1,
         estimation_method=o3d.pipelines.registration.TransformationEstimationPointToPoint()
     )
     
     # Apply transformation to the source points
     transformation = reg_result.transformation
-    aligned_points = (np.asarray(source_points) @ transformation[:3, :3].T) + transformation[:3, 3]
+    inverse_rotation_matrix = np.linalg.inv(transformation[:3, :3])
+    aligned_pcd = pcd_source.rotate(inverse_rotation_matrix, center=(0, 0, 0))
     
-    return aligned_points
+    return np.asarray(aligned_pcd.points)
 
 def save_point_cloud(points, filename):
     """Save point cloud to .ply file"""
     pcd = o3d.geometry.PointCloud()
     pcd.points = o3d.utility.Vector3dVector(points)
     o3d.io.write_point_cloud(filename, pcd)
-
-def load_glb_as_mesh(filepath):
-    """Load a GLB file and extract the first mesh found"""
-    scene = trimesh.load(filepath)
-    
-    # If the GLB contains a scene with multiple meshes, combine them
-    if isinstance(scene, trimesh.Scene):
-        mesh = scene.to_geometry()
-    elif isinstance(scene, trimesh.Trimesh):
-        mesh = scene
-    else:
-        raise ValueError("GLB file contains unsupported data")
-    
-    return mesh
 
 def pointcloud_to_voxel(points, pitch=0.01):
     """Convert point cloud to voxel grid"""
@@ -74,22 +62,23 @@ def normalize(points):
     return (points - np.mean(points, axis=0)) / np.max(np.ptp(points, axis=0))
 
 # Load and preprocess meshes
-ground_truth_mesh = load_glb_as_mesh("references/elephant_gt.glb").process(validate=True)
-output_mesh = trimesh.load("outputs/triposr/2/mesh.obj").process(validate=True)
+ground_truth_mesh = trimesh.load("references/minecraft_pig_gt.glb", ignore_orientation=True).to_geometry()
+output_mesh = trimesh.load("outputs/hunyuan/minecraft_pig.glb", ignore_orientation=True).to_geometry()
 
 # Sample point clouds from aligned meshes
-points_gt = ground_truth_mesh.sample(10000)
-points_output = output_mesh.sample(10000)
+points_gt = ground_truth_mesh.sample(50000)
+points_output = output_mesh.sample(50000)
 
-#points_gt = normalize(points_gt)
-#points_output = normalize(points_output)
+save_point_cloud(points_gt, "tests/gt.ply")
+save_point_cloud(points_output, "tests/output.ply")
+
+points_gt = normalize(points_gt)
+points_output = normalize(points_output)
 
 # Align meshes (align output_mesh to ground_truth_mesh)
 points_aligned = align_pc(points_output.copy(), points_gt)
 
 # Export point clouds for comparison
-save_point_cloud(points_gt, "tests/gt.ply")
-save_point_cloud(points_output, "tests/output.ply")
 save_point_cloud(points_aligned, "tests/aligned.ply")
 
 # Chamfer
@@ -100,7 +89,6 @@ pc_aligned = torch.tensor(points_aligned, dtype=torch.float32).unsqueeze(0)  # [
 # Compute Chamfer Distance
 cd, _ = chamfer_distance(pc_gt, pc_aligned)
 print(f"Chamfer Distance after alignment: {cd.item():.6f}")
-
 
 # IoU
 # Voxelize point clouds (aligned and ground truth)

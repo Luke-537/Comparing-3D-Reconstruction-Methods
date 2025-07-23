@@ -205,5 +205,10 @@ cython_debug/
 marimo/_static/
 marimo/_lsp/
 __marimo__/
+
+
 output/
 tests/
+mast3r/
+benchmark_test.py
+met3r_eval.py
