@@ -9,7 +9,7 @@ MET3R_ROOT = Path(__file__).resolve().parent / met3r_base
 sys.path.insert(0, str(MET3R_ROOT))
 from met3r import MEt3R
 
-IMG_SIZE = 128
+IMG_SIZE = 512
 
 def met3r_score(img1_path, img2_path, metric):
     """Calculate the met3r score (between 0 and 1) for two images to measure their consistency."""
@@ -23,7 +23,7 @@ def met3r_score(img1_path, img2_path, metric):
     images = [transform(Image.open(path).convert('RGB')) for path in [img1_path, img2_path]]
 
     images_tensor = torch.stack(images)
-    inputs = images_tensor.view(1, 2, 3, IMG_SIZE, IMG_SIZE).cuda()
+    inputs = images_tensor.view(2, 2, 3, IMG_SIZE, IMG_SIZE).cuda()
 
     torch.cuda.empty_cache()
 
