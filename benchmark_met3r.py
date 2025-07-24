@@ -23,7 +23,7 @@ def met3r_score(img1_path, img2_path, metric):
     images = [transform(Image.open(path).convert('RGB')) for path in [img1_path, img2_path]]
 
     images_tensor = torch.stack(images)
-    inputs = images_tensor.view(2, 2, 3, IMG_SIZE, IMG_SIZE).cuda()
+    inputs = images_tensor.view(1, 2, 3, IMG_SIZE, IMG_SIZE).cuda()
 
     torch.cuda.empty_cache()
 
