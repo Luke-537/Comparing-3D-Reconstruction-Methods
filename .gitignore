@@ -210,5 +210,5 @@ __marimo__/
 output/
 tests/
 mast3r/
-/benchmark_test.py
-/met3r_eval.py
+benchmark_test.py
+met3r_eval.py
